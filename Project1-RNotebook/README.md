@@ -1,17 +1,24 @@
 # Spring 2018
 # Project 1: What did the presidents say at their inauguation?
 
-![image](figs/title.jpg)
 
 ### [Project Description](doc/)
 This is the first and only *individual* (as opposed to *team*) this semester. 
 
 Term: Spring 2018
 
-+ Projec title: Lorem ipsum dolor sit amet
-+ This project is conducted by [your name]
++ Projec title: The Colloquialism Trend in the President inaguration Speeches
++ This project is conducted by Wenyi Tao
 
-+ Project summary: [a short summary] Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ Project summary: [a short summary] In this project,I would like to investigate the colloquialism trend in president inaguration speech. Colloquialism means the use of ordinary or familiar words or phrases.Back to the history, the president inauguration speeches are seems to have more emphasis on the topics about the foundation of Unites States. The people who have voting rights are well-educated and belong to the upper class. However, nowadays the inauguration speeches are tending to use plain languages. This might be a strategy to send messages to the people from all level of society. 
+
+The structure of the report is as followed
+#### 1.Messurement of colloquialism
+##### 1.1 Word level ranked by word's freqency list
+##### 1.2 Average Sentence Complexity by word syntax analysis
+#### 2 data cleaning and processing (details are included in jupyternotebook)
+#### 3 Result display and insights
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
