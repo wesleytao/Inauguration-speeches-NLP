@@ -3,7 +3,7 @@
 
 The doc directory contains the report or presentation files. It can have subfolders.  
 
-### Findings are result: 
+### Findings and result: 
 Plotting.html 
 
 ### Datacleaning and Parsing:
