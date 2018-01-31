@@ -1,0 +1,164 @@
+---
+title: "Colloquialism Trend in the President inaguration Speeches"
+author: "Wesley_Tao"
+date: "2018/1/30"
+output: html_document
+---
+### Brief
+In this project,I would like to investigate the colloquialism trend in president inaguration speech. Colloquialism means the use of ordinary or familiar words or phrases.Back to the history, the president inauguration speeches are seems to have more emphasis on the topics about the foundation of Unites States. The people who have voting rights are well-educated and belong to the upper class. However, nowadays the inauguration speeches are tending to use plain languages. This might be a strategy to send messages to the people from all level of society. 
+
+# 1.Messurement of colloquialism
+## 1.1 Word level ranked by word's freqency list
+One way to address this problem is to look at the words they used in the speech. We believed thoses words are carefully selected without mistakes. I picked CET-4 CET-6 TOEFL and GRE vocabulary list as benchmarks for each speech. I also introduced the Wiki100K wordlist sorted by frequency as a score board for each word. For exmaple, "of" rank 4 in the list will recieve 4 points, "citizen" rank 3437 in the list will recieve 3437 points. Total points for each speech is the sum of the points of all the words. The avg.score is the total points 
+$$ avg.score=\frac{sum\, of  \, points}{total \,word \, count}$$
+$$single \,point = rank \enspace in \enspace frequency \enspace list  $$
+The higher the score, the higer level the speech is.
+
+## 1.2 Average Sentence Complexity by word syntax analysis
+The length of the sentence will be a good candidate indicator for the measurement, but syntax complexity is more appropriate for this problem. If one sentence are long and complex in terms of syntax, we believe it is more academical and convoluted rather than easy and plain. Such sentence either has twisted logics or more adjectives or adverbs to modify the sentence. 
+One extreme case is the verbal reasoning test in GMAT or GRE.
+
+![Caption for the picture.](C:/Users/Wesle/Documents/GitHub/ADS_Teaching/Projects_StarterCodes/Project1-RNotebook/data/tree.jpg)
+
+The syntax complexity is best captured by the depth of a syntax tree. The deeper the tree is, the more complicated the sentence is.
+
+# 2 data cleaning and processing
+We use python as our primary tool for word parsing and syntax analysis. The module I used is named spacy and pretty handy for entity annotation and syntax parsing. All the detials could be found in the jupyter notebook "NLP for inauguration speech" or its corresponding html file. This Rmarkdown are for displaying pics and result only.
+
+
+# 3 Result display
+```{r}
+library(ggplot2)
+setwd("c:/Users/Wesle/Documents/GitHub/ADS_Teaching/Projects_StarterCodes/Project1-RNotebook/data")
+complexity<-read.csv("complexity.csv") # load data
+dateinfo<-read.csv("date2.csv") # load data
+complexity<-complexity[,3:ncol(complexity)]# get rid of useless index 
+dateinfo<-dateinfo[,3:ncol(dateinfo)]# get rid of useless index 
+finaldata<-merge(dateinfo, complexity, by=c("File","Term")) #merge two dataset
+```
+
+```{r}
+# the blocks here are mainly for computing the percentage and average score
+names(finaldata)
+finaldata$avg.score<-finaldata$score/finaldata$Total.words
+finaldata$date<-as.Date(finaldata$date, "%m/%d/%Y")
+finaldata$Trivial.per<-finaldata$Trivial.words/finaldata$Total.words
+finaldata$cet4.per<-finaldata$cet4/finaldata$Total.words
+finaldata$cet6.per<-finaldata$cet6/finaldata$Total.words
+finaldata$GRE.per<-finaldata$GRE/finaldata$Total.words
+finaldata$toefl.per<-finaldata$toefl/finaldata$Total.words
+finaldata$other.per<-(1-finaldata$cet4.per-finaldata$cet6.per-finaldata$GRE.per-finaldata$toefl.per)
+
+```
+
+## 3.1 Party 
+```{r}
+# party
+library(reshape2)
+Partydata<-finaldata[c("Party","cet6","GRE","toefl")]
+split.party<-split(Partydata[c("cet6","GRE","toefl")],Partydata$Party)
+coutparty<-sapply(split.party, colMeans)
+countparty<-as.data.frame(t(coutparty))
+countparty$party<-rownames(countparty)
+countpartybar<-melt(countparty,id.vars="party",variable.name = "class",value.name = "wordcount")
+ggplot(countpartybar, aes(x=party,y=wordcount,fill=class)) +
+    geom_bar(stat = "identity") +    # Use hollow circles
+    labs(title="Average number of words per speech grouped by Party")+
+    coord_flip()
+  
+```
+
+##### In this pictures, we do see that republicans are more likely to use words that are belong to the high level compared with Democratics
+
+
+
+```{r}
+Partyscore<-finaldata[c("Party","score")]
+Partyscore<-tapply(Partyscore$score,Partyscore$Party,mean)
+Partyscore<-data.frame(Partyscore)
+Partyscore$party<-rownames(Partyscore)
+ggplot(Partyscore, aes(x=party,y=Partyscore)) +
+    geom_bar(stat = "identity") +    # Use hollow circles
+    labs(title="Average score per speech sorted by Party")+
+    coord_flip()
+```
+##### The result further corroborate my finding. The the average score each word used by republican is higher than one of the democratics.
+
+```{r}
+Partyscore<-finaldata[c("Party","AvgDepth")]
+Partyscore<-tapply(Partyscore$AvgDepth,Partyscore$Party,mean)
+Partyscore<-data.frame(Partyscore)
+Partyscore$party<-rownames(Partyscore)
+ggplot(Partyscore, aes(x=party,y=Partyscore)) +
+    geom_bar(stat = "identity") +   
+    labs(title="Average Depth per speech sorted by Party")+
+    coord_flip()
+```
+
+
+## Term 
+
+```{r}
+#select thoes presidents who have exactly 2 terms 
+library(plyr)
+freboard<-count(finaldata$File)
+twotermpresident<-freboard$x[freboard$freq==2]
+twoterm<-finaldata[finaldata$File %in% twotermpresident,]
+termdata<-twoterm[c("Term","avg.score","AvgDepth","AvgLen","Total.words")]
+split.termdata<-split(termdata,termdata$Term)
+termplot<-data.frame(t(sapply(split.termdata,colMeans)))
+termplot<-melt(termplot,id.vars ="Term",variable.name = "criteria",value.name = "score")
+termplot
+```
+The Score board shows that inauguration speech of the second term is generally tend to have less score and shorter sentences and less complicated syntax than the first term. The might be a indicator that president in the second term care less about his speech. I hope that the boxplot below convince you through this.
+
+
+
+```{r}
+scaledata<-data.frame(scale(termdata[,2:5]))
+scaledata$term<-as.factor(termdata[,1])
+ggplot(scaledata) +
+        geom_boxplot(aes(x = term, y = avg.score))+
+        ggtitle("Boxplot of avg.score by term")
+```
+
+```{r}
+ggplot(scaledata) +
+        geom_boxplot(aes(x = term, y = Total.words))+
+        ggtitle("Boxplot of Total.words by term")
+```
+
+
+# Colloquial Trend for all the time
+
+
+
+```{r}
+ggplot(finaldata, aes(x=date, y=avg.score)) +
+    geom_point(shape=1) +    # Use hollow circles
+    geom_smooth(method=lm,   # Add linear regression line
+                se=FALSE)+    # Don't add shaded confidence region
+    labs(title="Average score per word across time")
+
+```
+```{r}
+ggplot(finaldata, aes(x=date, y=AvgLen)) +
+    geom_point(shape=1) +    # Use hollow circles
+    geom_smooth(method=lm,   # Add linear regression line
+                se=FALSE)+    # Don't add shaded confidence region
+    labs(title="Average length per sentence across time")
+
+```
+
+```{r}
+ggplot(finaldata, aes(x=date, y=AvgDepth)) +
+    geom_point(shape=1) +    # Use hollow circles
+    geom_smooth(method=lm,   # Add linear regression line
+                se=FALSE)+    # Don't add shaded confidence region
+    labs(title="Average depth per sentence across  time")
+```
+
+
+
+
+
